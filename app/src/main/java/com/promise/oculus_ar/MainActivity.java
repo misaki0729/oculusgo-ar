@@ -1,10 +1,15 @@
 package com.promise.oculus_ar;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import eu.kudan.kudan.ARAPIKey;
 import eu.kudan.kudan.ARActivity;
+import eu.kudan.kudan.ARImageTracker;
 
 public class MainActivity extends ARActivity {
 
@@ -14,9 +19,38 @@ public class MainActivity extends ARActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        // setContentView(R.layout.activity_main);
 
         key = ARAPIKey.getInstance();
         key.setAPIKey(DEVELOP_KEY);
+
+        permissionRequest();
+    }
+
+    @Override
+    public void setup() {
+        super.setup();
+
+        ARImageTracker tracker = ARImageTracker.getInstance();
+        tracker.initialise();
+    }
+
+    private void permissionRequest() {
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+
+            // Android 6.0 のみ、該当パーミッションが許可されていない場合
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+                final int REQUEST_CODE = 1;
+                ActivityCompat.requestPermissions(this, new String[]{
+                        Manifest.permission.CAMERA
+                }, REQUEST_CODE);
+            }
+
+        } else {
+            setup();
+        }
     }
 }
